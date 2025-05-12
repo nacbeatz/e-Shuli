@@ -1,26 +1,38 @@
 // /home/ubuntu/e_learning_platform/backend/src/middleware/roleMiddleware.js
 
-// module.exports = function (roles) {
-//   return (req, res, next) => {
-//     if (!req.user || !req.user.role) {
-//       return res.status(403).json({ msg: "Access denied. No role information." });
-//     }
-//     if (!roles.includes(req.user.role)) {
-//       return res.status(403).json({ msg: "Access denied. Insufficient permissions." });
-//     }
-//     next();
-//   };
-// };
-
-// Placeholder middleware
-module.exports = function (roles) {
-  return (req, res, next) => {
-    console.log(`roleMiddleware placeholder: Required roles: ${roles}. Bypassing check for now.`);
-    // For testing, ensure req.user.role is set by authMiddleware mock or similar
-    // if (req.user && !roles.includes(req.user.role)) {
-    //   return res.status(403).json({ msg: "Access denied (mock check)." });
-    // }
+// Middleware to check if user is an Admin
+exports.isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === "Admin") {
     next();
-  };
+  } else {
+    res.status(403).json({ message: "Access denied. Admin role required." });
+  }
+};
+
+// Middleware to check if user is a Lecturer
+exports.isLecturer = (req, res, next) => {
+  if (req.user && req.user.role === "Lecturer") {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Lecturer role required." });
+  }
+};
+
+// Middleware to check if user is a Student
+exports.isStudent = (req, res, next) => {
+  if (req.user && req.user.role === "Student") {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Student role required." });
+  }
+};
+
+// Middleware to check if user is a Lecturer OR an Admin
+exports.isLecturerOrAdmin = (req, res, next) => {
+    if (req.user && (req.user.role === "Lecturer" || req.user.role === "Admin")) {
+        next();
+    } else {
+        res.status(403).json({ message: "Access denied. Lecturer or Admin role required." });
+    }
 };
 

@@ -1,48 +1,43 @@
 // /home/ubuntu/e_learning_platform/backend/src/routes/courseRoutes.js
-
 const express = require("express");
 const router = express.Router();
-// const courseController = require("../controllers/courseController"); // To be created
-// const authMiddleware = require("../middleware/authMiddleware"); // To be created
-// const roleMiddleware = require("../middleware/roleMiddleware"); // To be created (e.g., for lecturer, admin)
+const courseController = require("../controllers/courseController");
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 
-// @route   GET api/courses
-// @desc    Get all published courses (for students/public)
-// @access  Public
-// router.get("/", courseController.getAllPublishedCourses);
+// POST /api/v1/courses - Create a new course
+router.post("/", 
+    authMiddleware.verifyToken, 
+    roleMiddleware.isLecturerOrAdmin, 
+    courseController.createCourse
+);
 
-// @route   GET api/courses/:courseId
-// @desc    Get a single course by ID (for students/public, if published)
-// @access  Public
-// router.get("/:courseId", courseController.getCourseById);
+// GET /api/v1/courses - Get all published courses (publicly accessible, filtering handled in controller)
+router.get("/", courseController.getAllPublishedCourses);
 
-// @route   POST api/courses
-// @desc    Create a new course (Lecturer or Admin only)
-// @access  Private (Lecturer, Admin)
-// router.post("/", authMiddleware, roleMiddleware(["lecturer", "admin"]), courseController.createCourse);
+// GET /api/v1/courses/my-creations - Get courses created by the authenticated lecturer
+router.get("/my-creations",
+    authMiddleware.verifyToken,
+    roleMiddleware.isLecturer,
+    courseController.getLecturerCourses
+);
 
-// @route   PUT api/courses/:courseId
-// @desc    Update a course (Lecturer who owns it, or Admin)
-// @access  Private (Lecturer, Admin)
-// router.put("/:courseId", authMiddleware, roleMiddleware(["lecturer", "admin"]), courseController.updateCourse);
+// GET /api/v1/courses/:courseId - Get a single course by ID (access control handled in controller)
+router.get("/:courseId", authMiddleware.verifyTokenOptional, courseController.getCourseById); // verifyTokenOptional allows non-logged in users too
 
-// @route   DELETE api/courses/:courseId
-// @desc    Delete a course (Admin only or Lecturer who owns it - define policy)
-// @access  Private (Lecturer, Admin)
-// router.delete("/:courseId", authMiddleware, roleMiddleware(["lecturer", "admin"]), courseController.deleteCourse);
+// PUT /api/v1/courses/:courseId - Update an existing course
+router.put("/:courseId",
+    authMiddleware.verifyToken,
+    roleMiddleware.isLecturerOrAdmin, // Further ownership check done in controller
+    courseController.updateCourse
+);
 
-// --- Module and Lesson specific routes within a course ---
-// Example: POST api/courses/:courseId/modules
-// router.post("/:courseId/modules", authMiddleware, roleMiddleware(["lecturer", "admin"]), courseController.addModuleToCourse);
-
-// Example: POST api/courses/:courseId/modules/:moduleId/lessons
-// router.post("/:courseId/modules/:moduleId/lessons", authMiddleware, roleMiddleware(["lecturer", "admin"]), courseController.addLessonToModule);
-
-// --- Quiz and Assignment routes (could be nested or separate) ---
-// Example: POST api/quizzes (if quizzes are top-level, linked to courses)
-// router.post("/quizzes", authMiddleware, roleMiddleware(["lecturer", "admin"]), courseController.createQuiz);
-
-router.get("/placeholder", (req, res) => res.json({message: "Course routes placeholder"}));
+// DELETE /api/v1/courses/:courseId - Delete a course
+router.delete("/:courseId",
+    authMiddleware.verifyToken,
+    roleMiddleware.isLecturerOrAdmin, // Further ownership check done in controller
+    courseController.deleteCourse
+);
 
 module.exports = router;
 
