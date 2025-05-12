@@ -1,0 +1,13 @@
+/* /home/ubuntu/e_learning_platform/frontend/src/App.css */
+
+.App {
+  text-align: center;
+}
+
+.main-content {
+  min-height: 80vh; /* Ensure content pushes footer down */
+  padding: 20px;
+}
+
+/* Add more global styles or component-specific styles in their own files */
+
